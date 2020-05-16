@@ -6,3 +6,8 @@ one.
 1. Put your KML files into `./mytracks`
 1. `ruby merge.rb`
 1. take the `merged*.kml` file
+
+
+## On the phone
+
+- Go to Google Drive, select the file, and then "Copy to" (not "Download"). I don't know why...
