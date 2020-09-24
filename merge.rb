@@ -78,7 +78,7 @@ end
 
 # Generate a merged route name given the files included in it.
 def route_name(parsed_files)
-  "Merged #{ parsed_files.first[:date] } to #{ parsed_files.last[:date] }"
+  "Merged from #{ parsed_files.first[:date] } to #{ parsed_files.last[:date] }"
 end
 
 # ----------------------------------------------------------------------------
@@ -92,5 +92,5 @@ final_file_lines = combine_file_lines(parsed_files)
 final_file = final_file_lines.flatten.join("\n")
 final_file = rename_route(final_file, route_name(parsed_files))
 
-output_filename = route_name(parsed_files).gsub(" ", "_").gsub("-", "_").downcase + ".kml"
+output_filename = route_name(parsed_files) + ".kml"
 File.open(output_filename, 'w') {|f| f.write(final_file) }
