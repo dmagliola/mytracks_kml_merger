@@ -76,6 +76,11 @@ def parse_timestamp_line(line)
   DateTime.parse(match[1]) if match
 end
 
+# Generate a timestamp line for a given time
+def generate_timestamp_line(new_time)
+  "<when>#{ new_time.strftime("%Y-%m-%dT%H:%M:%S.%LZ") }</when>"
+end
+
 # Routes have a name that shows up in the app, buried in the XML header.
 # This will regex find/replace that tag with a new name.
 def rename_route(file_contents, route_name)
@@ -159,6 +164,47 @@ def split(args)
   output_manipulated_file(split_file_after, output_filename: "output_after.kml")
 end
 
+def retime(args)
+  filename = args[:file] || raise("must specify file to work on with --file")
+  new_start_time = args[:start] ? DateTime.parse(args[:start]) : raise("must specify new start time with --start")
+  parsed_file = parse_kml_file(filename)
+
+  old_start_time = parse_timestamp_line(parsed_file[:timestamps].first)
+  difference = new_start_time - old_start_time
+
+  parsed_file[:timestamps] = parsed_file[:timestamps].map do |when_line|
+    generate_timestamp_line(parse_timestamp_line(when_line) + difference)
+  end
+
+  output_manipulated_file(parsed_file)
+end
+
+def compress_time(args)
+  filename = args[:file] || raise("must specify file to work on with --file")
+  new_end_time = args[:end] ? DateTime.parse(args[:end]) : raise("must specify new end time with --end")
+  parsed_file = parse_kml_file(filename)
+
+  start_time = parse_timestamp_line(parsed_file[:timestamps].first)
+  old_end_time = parse_timestamp_line(parsed_file[:timestamps].last)
+
+  factor = (new_end_time - start_time) / (old_end_time - start_time)
+
+  puts start_time
+  puts old_end_time
+  puts new_end_time
+  puts (new_end_time - start_time)
+  puts (old_end_time - start_time)
+  puts factor.to_f
+
+  parsed_file[:timestamps] = parsed_file[:timestamps].map do |when_line|
+    old_time = parse_timestamp_line(when_line)
+    new_time = start_time + (old_time - start_time).to_f * factor
+    generate_timestamp_line(new_time)
+  end
+
+  output_manipulated_file(parsed_file)
+end
+
 # ----------------------------------------------------------------------------
 
 # Parse CLI arguments and run the right command method
@@ -169,12 +215,16 @@ opts.separator "Commands:"
 opts.separator "  merge_all: (default) merge all the files in `my_tracks` into one"
 opts.separator "  slice: Generate a new file with only the datapoints that fit within the --from and --to parameters"
 opts.separator "  split: split into 2 new files with the datapoints before/after the --at parameter, respectively"
+opts.separator "  retime: change the timestamps for a route so it lasts the same, but starts at the --start parameter"
+opts.separator "  compress_time: change the timestamps progressively for a route so it starts at the same time, but ends at --end parameter"
 opts.separator ""
 opts.separator "Parameters:"
 opts.string "-f", "--file", "file to work on"
 opts.string "--from", "start time when slicing datapoints"
 opts.string "--to", "end time when slicing datapoints"
 opts.string "--at", "split timestamp when splitting a file"
+opts.string "--start", "new start time for the route being retimed"
+opts.string "--end", "new start time for the route being time compressed"
 opts.on "-h", "--help" do
   puts opts
 end
