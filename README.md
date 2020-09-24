@@ -14,6 +14,7 @@ This is a really janky, hacky script, but it does the job.
 1. Copy the downloaded `mytracks` folder to this repo's `mytracks` 
 1. Manipulate any files you may need to manipulate. (see section below)
     - Use the visualizers below, plus this script's CLI arguments to generate the file you actually want.
+    - Read the code of `merge_all()` to understand what kind of things need to happen to a file you touch. 
     - If you manually manipulate a track, upload it to `mytracks_original` with suffix `-fixed`
     - If you'd originally renamed the track to call attention to it, rename it back to the standard Date 
       format in `mytracks_original`.
@@ -28,6 +29,16 @@ This is a really janky, hacky script, but it does the job.
 ## On the phone
 
 - Go to Google Drive, select the file, and then "Copy to" (not "Download"). I don't know why...
+
+
+## Manipulating the individual tracks to merge
+
+All of these are commands are run with `ruby merge.rb command [options]`, act on one single file specified with
+the `-f` parameter, and generate an `output.kml` in the root directory with the results.
+
+- Slice a file: Reduce the route in a file to only points that fall between the two specified timestamps
+    - `ruby merge.rb slice -f "mytracks/Route from 2020-07-23 11_39.kml" --from "2020-07-23 13:14:47" --to "2020-07-23 14:00:10"` 
+
 ## Utilities
 
 - [Online KML Viewer](http://kmlviewer.nsspot.net/): Useful to just see a route

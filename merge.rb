@@ -1,3 +1,4 @@
+require 'date'
 require 'slop'
 
 # A KML file is a bunch of metadata (a header),
@@ -69,6 +70,12 @@ def date_from_filename(filename)
   match[1] if match
 end
 
+# Return the parsed timestamp from a "<when>" line.
+def parse_timestamp_line(line)
+  match = /<when>(.*?)<\/when>/.match(line)
+  DateTime.parse(match[1]) if match
+end
+
 # Routes have a name that shows up in the app, buried in the XML header.
 # This will regex find/replace that tag with a new name.
 def rename_route(file_contents, route_name)
@@ -83,6 +90,13 @@ def route_name(parsed_files)
   "Merged from #{ parsed_files.first[:date] } to #{ parsed_files.last[:date] }"
 end
 
+# Called by all manipulation commands but `merge_all`
+# Generates file "output.kml" with the modified file parts
+def output_manipulated_file(parsed_file)
+  output_file_lines = combine_file_lines([parsed_file])
+  output_file = output_file_lines.flatten.join("\n")
+  File.open("output.kml", 'w') {|f| f.write(output_file) }
+end
 
 # ----------------------------------------------------------------------------
 # Commands
@@ -100,6 +114,28 @@ def merge_all(_args)
   File.open(output_filename, 'w') {|f| f.write(final_file) }
 end
 
+def slice(args)
+  filename = args[:file] || raise("must specify file to work on with --file")
+  parsed_file = parse_kml_file(filename)
+
+  from_time = args[:from] ? DateTime.parse(args[:from]) : nil
+  to_time = args[:to] ? DateTime.parse(args[:to]) : nil
+
+  # Drop leading points that are too early
+  while from_time && parse_timestamp_line(parsed_file[:timestamps].first) < from_time
+    parsed_file[:timestamps].shift
+    parsed_file[:coords].shift
+  end
+
+  # Drop trailing points that are too late
+  while to_time && parse_timestamp_line(parsed_file[:timestamps].last) > to_time
+    parsed_file[:timestamps].pop
+    parsed_file[:coords].pop
+  end
+
+  output_manipulated_file(parsed_file)
+end
+
 # ----------------------------------------------------------------------------
 
 # Parse CLI arguments and run the right command method
@@ -108,8 +144,12 @@ opts.banner = "usage: command [params] ..."
 opts.separator ""
 opts.separator "Commands:"
 opts.separator "  merge_all: (default) merge all the files in `my_tracks` into one"
+opts.separator "  slice: Generate a new file with only the datapoints that fit within the --from and --to parameters"
 opts.separator ""
 opts.separator "Parameters:"
+opts.string "-f", "--file", "file to work on"
+opts.string "--from", "start time when slicing datapoints"
+opts.string "--to", "end time when slicing datapoints"
 opts.on "-h", "--help" do
   puts opts
 end
