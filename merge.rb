@@ -1,4 +1,6 @@
-# A KML file is a bunch of metadata (a header), 
+require 'slop'
+
+# A KML file is a bunch of metadata (a header),
 # then N timestamps, one per point in the recorded track (one per line in the file)
 # then N coordinates, one per point (why these aren't next to each other is beyond me)
 # then a footer closing all the opened tags.
@@ -81,16 +83,39 @@ def route_name(parsed_files)
   "Merged from #{ parsed_files.first[:date] } to #{ parsed_files.last[:date] }"
 end
 
-# ----------------------------------------------------------------------------
 
-# Actual run code:
-parsed_files = Dir.glob("./mytracks/*.kml").sort.map do |filename|
-  parse_kml_file(filename)
+# ----------------------------------------------------------------------------
+# Commands
+
+def merge_all(_args)
+  parsed_files = Dir.glob("./mytracks/*.kml").sort.map do |filename|
+    parse_kml_file(filename)
+  end
+
+  final_file_lines = combine_file_lines(parsed_files)
+  final_file = final_file_lines.flatten.join("\n")
+  final_file = rename_route(final_file, route_name(parsed_files))
+
+  output_filename = route_name(parsed_files) + ".kml"
+  File.open(output_filename, 'w') {|f| f.write(final_file) }
 end
 
-final_file_lines = combine_file_lines(parsed_files)
-final_file = final_file_lines.flatten.join("\n")
-final_file = rename_route(final_file, route_name(parsed_files))
+# ----------------------------------------------------------------------------
 
-output_filename = route_name(parsed_files) + ".kml"
-File.open(output_filename, 'w') {|f| f.write(final_file) }
+# Parse CLI arguments and run the right command method
+opts = Slop::Options.new
+opts.banner = "usage: command [params] ..."
+opts.separator ""
+opts.separator "Commands:"
+opts.separator "  merge_all: (default) merge all the files in `my_tracks` into one"
+opts.separator ""
+opts.separator "Parameters:"
+opts.on "-h", "--help" do
+  puts opts
+end
+
+parser = Slop::Parser.new(opts)
+result = parser.parse(ARGV)
+
+command = result.arguments.first || "merge_all"
+send command, result.to_hash
