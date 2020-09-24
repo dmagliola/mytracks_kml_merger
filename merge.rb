@@ -92,10 +92,10 @@ end
 
 # Called by all manipulation commands but `merge_all`
 # Generates file "output.kml" with the modified file parts
-def output_manipulated_file(parsed_file)
+def output_manipulated_file(parsed_file, output_filename: "output.kml")
   output_file_lines = combine_file_lines([parsed_file])
   output_file = output_file_lines.flatten.join("\n")
-  File.open("output.kml", 'w') {|f| f.write(output_file) }
+  File.open(output_filename, 'w') {|f| f.write(output_file) }
 end
 
 # ----------------------------------------------------------------------------
@@ -136,6 +136,29 @@ def slice(args)
   output_manipulated_file(parsed_file)
 end
 
+def split(args)
+  filename = args[:file] || raise("must specify file to work on with --file")
+  split_time = args[:at] ? DateTime.parse(args[:at]) : raise("must specify split time with --at")
+
+  split_file_before = parse_kml_file(filename)
+  split_file_after = parse_kml_file(filename)
+
+  # Drop trailing points that are too late from first file
+  while parse_timestamp_line(split_file_before[:timestamps].last) > split_time
+    split_file_before[:timestamps].pop
+    split_file_before[:coords].pop
+  end
+
+  # Drop leading points that are too early from second file
+  while parse_timestamp_line(split_file_after[:timestamps].first) < split_time
+    split_file_after[:timestamps].shift
+    split_file_after[:coords].shift
+  end
+
+  output_manipulated_file(split_file_before, output_filename: "output_before.kml")
+  output_manipulated_file(split_file_after, output_filename: "output_after.kml")
+end
+
 # ----------------------------------------------------------------------------
 
 # Parse CLI arguments and run the right command method
@@ -145,11 +168,13 @@ opts.separator ""
 opts.separator "Commands:"
 opts.separator "  merge_all: (default) merge all the files in `my_tracks` into one"
 opts.separator "  slice: Generate a new file with only the datapoints that fit within the --from and --to parameters"
+opts.separator "  split: split into 2 new files with the datapoints before/after the --at parameter, respectively"
 opts.separator ""
 opts.separator "Parameters:"
 opts.string "-f", "--file", "file to work on"
 opts.string "--from", "start time when slicing datapoints"
 opts.string "--to", "end time when slicing datapoints"
+opts.string "--at", "split timestamp when splitting a file"
 opts.on "-h", "--help" do
   puts opts
 end

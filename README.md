@@ -38,6 +38,9 @@ the `-f` parameter, and generate an `output.kml` in the root directory with the 
 
 - Slice a file: Reduce the route in a file to only points that fall between the two specified timestamps
     - `ruby merge.rb slice -f "mytracks/Route from 2020-07-23 11_39.kml" --from "2020-07-23 13:14:47" --to "2020-07-23 14:00:10"` 
+- Split a file: Split a route into two, with the points before/after the `--at` parameters. Outputs `output_before.kml`
+  and `output_after.kml`.
+    - `ruby merge.rb split -f "mytracks/Route from 2020-07-23 11_39.kml" --at "2020-07-23 14:00:10"` 
 
 ## Utilities
 
