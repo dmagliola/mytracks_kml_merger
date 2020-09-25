@@ -189,12 +189,7 @@ def compress_time(args)
 
   factor = (new_end_time - start_time) / (old_end_time - start_time)
 
-  puts start_time
-  puts old_end_time
-  puts new_end_time
-  puts (new_end_time - start_time)
-  puts (old_end_time - start_time)
-  puts factor.to_f
+  puts "Compression Factor: #{ factor.to_f }"
 
   parsed_file[:timestamps] = parsed_file[:timestamps].map do |when_line|
     old_time = parse_timestamp_line(when_line)
