@@ -20,16 +20,27 @@ This is a really janky, hacky script, but it does the job.
       format in `mytracks_original`.
     - Leave the manipulated file in `mytracks`, with the correct track name (with date in it) so it'll be
       picked up in order and its date parsed on the merge step.
-
 1. `ruby merge.rb` to merge all the files in the `mytracks` folder into a new one.
     - Maybe include the previous merged, maybe not... You may end up with enormous files... 
-1. take the `merged*.kml` file
+    - Lots of the graphing tools have a 10 Mb limit, so mind that.
+1. Upload the `Merged...` generated file to GDrive in `mytracks`
+1. Move all non-"Merged" tracks from `mytracks` to `mytracks_original`
 
+Getting the new merged track onto the phone:
 
-## On the phone
-
-- Go to Google Drive, select the file, and then "Copy to" (not "Download"). I don't know why...
-
+1. **DO NOT** go to Sync / Restore and "restore". It seems to re-restore old tracks that are no longer in `mytracks` 
+   somehow
+1. On the list of tracks, delete all of them. This will be exceedingly painful.
+1. Kill the MyTracks app
+1. Open the Drive app
+1. Choose the Merged tracks to copy to the phone and `Download`. 
+    - NOTE: In the past, I had trouble with the "downloaded" file, it wouldn't import, MyTracks would just crash.
+    - I made a note at the time to hit `Copy to`, (not `Download`!).
+    - That option no longer seems to be there, though, and importing after `Download` seems to work now...
+1. Go to list of tracks, menu on the top, Import, and select the files to import in the `Downloads` folder.
+    - Once the track imports, *leave it alone*!. Don't change it to Cycling, or anythign else, or MyTracks sometimes
+      does weird shit like double the distance. 
+1. On "Tracks & Markers", delete all the markers. They can all be selected and deleted at once.
 
 ## Manipulating the individual tracks to merge
 
