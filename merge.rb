@@ -200,6 +200,34 @@ def compress_time(args)
   output_manipulated_file(parsed_file)
 end
 
+COMPACTION_THRESHOLD = 5 * 60 / 86400.0 # Minimum gap to compact, in seconds
+COMPACTION_GAP = 3 / 86400.0 # How many seconds to leave between points in gaps we compact
+
+def compact_time(args)
+  filename = args[:file] || raise("must specify file to work on with --file")
+  parsed_file = parse_kml_file(filename)
+
+  diff_accum = 0 # how much we're subtracting from every date.
+
+  new_timestamps = []
+
+  parsed_file[:timestamps].each_with_index do |when_line, i|
+    prev_time = parse_timestamp_line(parsed_file[:timestamps][i - 1]) if i > 0
+    this_time = parse_timestamp_line(when_line)
+
+    if prev_time && (this_time - prev_time > COMPACTION_THRESHOLD)
+      diff_accum += (this_time - prev_time) - COMPACTION_GAP
+    end
+    new_time = this_time - diff_accum
+
+    new_timestamps << generate_timestamp_line(new_time)
+  end
+
+  parsed_file[:timestamps] = new_timestamps
+
+  output_manipulated_file(parsed_file)
+end
+
 # ----------------------------------------------------------------------------
 
 # Parse CLI arguments and run the right command method
@@ -212,6 +240,7 @@ opts.separator "  slice: Generate a new file with only the datapoints that fit w
 opts.separator "  split: split into 2 new files with the datapoints before/after the --at parameter, respectively"
 opts.separator "  retime: change the timestamps for a route so it lasts the same, but starts at the --start parameter"
 opts.separator "  compress_time: change the timestamps progressively for a route so it starts at the same time, but ends at --end parameter"
+opts.separator "  compact_time: eliminate time gaps between rides, so it's all one non-stop continuous ride."
 opts.separator ""
 opts.separator "Parameters:"
 opts.string "-f", "--file", "file to work on"

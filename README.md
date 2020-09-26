@@ -42,6 +42,18 @@ Getting the new merged track onto the phone:
       does weird shit like double the distance. 
 1. On "Tracks & Markers", delete all the markers. They can all be selected and deleted at once.
 
+
+Alternatively, and especially if My Tracks is being stupid:
+- Go to "App info", and clear all Cache and Stored data
+- Import the merged tracks again
+- Settings:
+    - General: Turn off everything
+    - Track & Marker: 
+        - Width of route: 6
+        - Auto save a route when stopped: Yes
+        - Photos shown: No
+        - Max speed should be less than: 60
+
 ## Manipulating the individual tracks to merge
 
 All of these are commands are run with `ruby merge.rb command [options]`, act on one single file specified with
@@ -56,6 +68,11 @@ the `-f` parameter, and generate an `output.kml` in the root directory with the 
     - `ruby merge.rb retime -f "mytracks/Route from 2020-07-23 11_39.kml" --start "2020-07-24T10:39:49.537Z"`
 - Compress time on a file: Change the length/speed of a route, so it starts at the same time, but ends at a new point in time.
     - `ruby merge.rb compress_time -f "mytracks/Route from 2020-07-23 11_39.kml" --end "2020-07-23T17:20:49.537Z"`
+- Compact time on a file: eliminates time gaps between rides, so it's all one non-stop continuous ride. 
+    Useful to calculate actual average speed and riding time.
+    - `ruby merge.rb compact_time -f "mytracks/Route from 2020-07-23 11_39.kml"
+    - These files won't import into My Tracks, for some stupid reason. GPS Visualizer has a "Show track statistics" 
+      option in "advanced leaflet" which will show total distance and total time.
 
 ## Utilities
 
