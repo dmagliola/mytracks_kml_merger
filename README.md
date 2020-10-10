@@ -63,7 +63,9 @@ the `-f` parameter, and generate an `output.kml` in the root directory with the 
     - `ruby merge.rb slice -f "mytracks/Route from 2020-07-23 11_39.kml" --from "2020-07-23 13:14:47" --to "2020-07-23 14:00:10"` 
 - Split a file: Split a route into two, with the points before/after the `--at` parameters. Outputs `output_before.kml`
   and `output_after.kml`.
-    - `ruby merge.rb split -f "mytracks/Route from 2020-07-23 11_39.kml" --at "2020-07-23 14:00:10"` 
+    - `ruby merge.rb split -f "mytracks/Route from 2020-07-23 11_39.kml" --at "2020-07-23 14:00:10"`
+    - **NOTE:** If you get error `merge.rb:153:in 'split': undefined method '>' for nil:NilClass (NoMethodError)`,
+        you entered a time that's not in the time range for the route. Either before the start or after the end. 
 - Retime a file: "Move" the times in a route, keeping the length/speed the same, so it starts at a new point in time.
     - `ruby merge.rb retime -f "mytracks/Route from 2020-07-23 11_39.kml" --start "2020-07-24T10:39:49.537Z"`
 - Compress time on a file: Change the length/speed of a route, so it starts at the same time, but ends at a new point in time.
