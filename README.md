@@ -46,6 +46,7 @@ Getting the new merged track onto the phone:
 Alternatively, and especially if My Tracks is being stupid:
 - Go to "App info", and clear all Cache and Stored data
 - Import the merged tracks again
+- Go to "No ads" on the menu, so it'll realize i've already paid.
 - Settings:
     - General: Turn off everything
     - Track & Marker: 
